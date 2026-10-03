@@ -4,7 +4,7 @@
 
 > **دیسکلیمر:** این پروژه سامانه بانکی دارای مجوز نیست، سرویس مالی واقعی ارائه نمی‌دهد و هیچ پول حقیقی جابه‌جا نمی‌کند. کیف پول تعاملی یک sandbox در مرورگر است.
 
-**لینک لایو:** _(بعد از دیپلوی اینجا بگذارید)_
+**لینک لایو:** _(پس از `git push` و اتصال پروژه به Vercel، URL تولید را اینجا بگذارید)_
 
 تهیه‌کننده سند محصول: Maryam Hasani
 
@@ -65,11 +65,25 @@ npm run test:e2e
 
 ### متغیر محیطی اختیاری
 
-برای metadata صحیح بعد از دیپلوی:
+برای metadata صحیح بعد از دیپلوی (در Vercel → Settings → Environment Variables):
 
 ```bash
-NEXT_PUBLIC_SITE_URL=https://your-domain.example
+NEXT_PUBLIC_SITE_URL=https://your-project.vercel.app
 ```
+
+### دیپلوی روی Vercel
+
+ریموت GitHub از قبل تنظیم است: `https://github.com/themaryamhasani/payflow.git`
+
+```bash
+git push -u origin main
+npx vercel login
+npx vercel --prod
+```
+
+یا در داشبورد Vercel: **Add New Project** → Import همین ریپو → Framework: Next.js → ست کردن `NEXT_PUBLIC_SITE_URL` → Deploy.
+
+بعد از بالا آمدن، لینک لایو را بالای همین README و در فوتر جایگزین کنید.
 
 ---
 

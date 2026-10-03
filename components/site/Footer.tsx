@@ -42,7 +42,10 @@ export function Footer() {
             بر اساس سند تحلیل و نیازمندی PayFlow. تهیه‌کننده سند: Maryam Hasani. واحد پول نمونه: ریال ایران.{" "}
             <Link href="/about">درباره این کیس‌استادی</Link>
             {" · "}
-            <span id="live-url-slot">لینک لایو پس از دیپلوی در README به‌روز می‌شود.</span>
+            <span>
+              لینک لایو پس از دیپلوی Vercel در <Link href="https://github.com/themaryamhasani/payflow">README</Link>{" "}
+              ثبت می‌شود.
+            </span>
           </p>
         </aside>
       </div>
