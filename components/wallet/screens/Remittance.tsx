@@ -177,7 +177,11 @@ export function Remittance({
 
       <div className="w-block">
         <h3>حواله‌های شما</h3>
-        {list.length === 0 ? <Empty title="حواله‌ای ثبت نشده است." /> : null}
+        {list.length === 0 ? (
+          <Empty title="حواله‌ای ثبت نشده است.">
+            <p className="w-help">اولین حواله بالای آستانه مسیر، برای بازبینی انطباق نگه داشته می‌شود.</p>
+          </Empty>
+        ) : null}
         {list.map((item) => {
           const tx = state.transactions.find((entry) => entry.id === item.transactionId);
           return (

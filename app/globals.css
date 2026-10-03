@@ -1,4 +1,7 @@
 :root {
+  --font-sans: "Vazirmatn", Tahoma, sans-serif;
+  --font-serif: "Instrument Serif", Georgia, serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
   --ink: #141a16;
   --muted: #3e4942;
   --faint: #5c675f;
@@ -25,7 +28,7 @@ body {
   margin: 0;
   background: var(--paper);
   color: var(--ink);
-  font-family: var(--font-sans), Tahoma, sans-serif;
+  font-family: var(--font-sans);
   font-size: 1.0625rem;
   line-height: 1.75;
   text-rendering: optimizeLegibility;
@@ -63,9 +66,18 @@ img, svg { display: block; max-width: 100%; }
   outline: 2px solid var(--copper-2);
   outline-offset: 3px;
 }
+:focus:not(:focus-visible) {
+  outline: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .section-defer {
+    content-visibility: auto;
+    contain-intrinsic-size: 1px 720px;
+  }
+}
 
-.serif { font-family: var(--font-serif), Georgia, serif; font-weight: 400; }
-.ref, .mono { font-family: var(--font-mono), ui-monospace, monospace; letter-spacing: 0; }
+.serif { font-family: var(--font-serif); font-weight: 400; }
+.ref, .mono { font-family: var(--font-mono); letter-spacing: 0; }
 .num { font-variant-numeric: tabular-nums; }
 
 .wrap {
@@ -225,6 +237,25 @@ h2 { font-size: clamp(2rem, 4.5vw, 3.55rem); letter-spacing: -0.03em; }
   color: rgba(244, 239, 230, 0.7);
 }
 .hero-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1.7rem; }
+.cta-note {
+  margin-top: 0.85rem;
+  max-width: 34rem;
+  color: rgba(244, 239, 230, 0.68);
+  font-size: 0.92rem;
+  line-height: 1.55;
+}
+.cta-note.on-dark { color: rgba(244, 239, 230, 0.68); }
+.site-disclaimer {
+  margin-top: 1.6rem;
+  padding-top: 1.1rem;
+  border-top: 1px solid var(--line);
+  display: grid;
+  gap: 0.55rem;
+  max-width: 52rem;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+.site-disclaimer strong { color: var(--ink); font-weight: 650; }
 .scroll-cue {
   position: absolute;
   bottom: 1.2rem;
@@ -543,7 +574,7 @@ h2 { font-size: clamp(2rem, 4.5vw, 3.55rem); letter-spacing: -0.03em; }
   font-size: 0.88rem;
   line-height: 1.7;
 }
-.sample pre code { font-family: var(--font-mono), ui-monospace, monospace; }
+.sample pre code { font-family: var(--font-mono); }
 .sample > p { margin-top: 0.9rem; color: var(--muted); }
 .events { margin-top: 2.2rem; padding-top: 1.2rem; border-top: 1px solid var(--line); }
 .events h3 { font-size: 1.3rem; margin-bottom: 0.8rem; }
@@ -765,20 +796,73 @@ h2 { font-size: clamp(2rem, 4.5vw, 3.55rem); letter-spacing: -0.03em; }
 .colo-top .serif { font-style: italic; font-size: 2rem; }
 .colo-top nav { display: flex; flex-wrap: wrap; gap: 0.7rem 1.1rem; max-width: 34rem; justify-content: flex-end; }
 .colo-top a { text-underline-offset: 0.25em; }
-.colo-note { margin-top: 1.5rem; color: var(--muted); max-width: 52rem; font-size: 0.95rem; }
 
 .missing {
   min-height: 100svh;
   display: grid;
   align-content: center;
-  gap: 0.8rem;
+  gap: 0.75rem;
   padding: 2rem;
   max-width: 40rem;
   margin-inline: auto;
 }
 .missing .serif { font-style: italic; font-size: 2rem; color: var(--copper); }
+.missing-kicker {
+  color: var(--copper);
+  letter-spacing: 0.08em;
+  font-size: 0.95rem;
+}
 .missing h1 { font-size: clamp(2rem, 5vw, 3.4rem); }
+.missing > p { color: var(--muted); max-width: 36rem; }
+.missing-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 0.6rem; }
+.missing-note {
+  margin-top: 0.4rem;
+  font-size: 0.92rem;
+  color: var(--faint);
+  max-width: 34rem;
+}
+
 .ico { width: 1.35rem; height: 1.35rem; }
+
+.about { padding: calc(var(--header) + 2rem) 0 4rem; }
+.about-hero { max-width: 46rem; }
+.about-hero h1 {
+  font-size: clamp(2rem, 5vw, 3.6rem);
+  margin: 0.4rem 0 1rem;
+  max-width: 18ch;
+}
+.about-lead { color: var(--muted); max-width: 42rem; }
+.about-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1.4rem; }
+.about-block { margin-top: 3rem; max-width: 46rem; }
+.about-block h2 { font-size: 1.55rem; margin-bottom: 0.7rem; }
+.about-block > p { color: var(--muted); }
+.about-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.7rem;
+}
+.about-list li {
+  display: grid;
+  gap: 0.2rem;
+  border-top: 1px solid var(--line);
+  padding-top: 0.7rem;
+}
+.about-list span { color: var(--muted); }
+.about-limits {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.55rem;
+}
+.about-limits li {
+  border-top: 1px solid var(--line);
+  padding-top: 0.55rem;
+  color: var(--muted);
+}
+.about-end .btn { margin-top: 1rem; }
 
 @keyframes rise {
   from { opacity: 0; transform: translateY(8px); }

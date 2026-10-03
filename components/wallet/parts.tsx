@@ -32,11 +32,20 @@ export function Row({ k, v }: { k: string; v: string }) {
   );
 }
 
-export function Empty({ title, children }: { title: string; children?: ReactNode }) {
+export function Empty({
+  title,
+  children,
+  action,
+}: {
+  title: string;
+  children?: ReactNode;
+  action?: ReactNode;
+}) {
   return (
-    <div className="w-empty">
-      <p>{title}</p>
-      {children}
+    <div className="w-empty" role="status">
+      <p className="w-empty-title">{title}</p>
+      {children ? <div className="w-empty-body">{children}</div> : null}
+      {action ? <div className="w-empty-action">{action}</div> : null}
     </div>
   );
 }

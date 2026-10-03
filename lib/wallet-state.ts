@@ -495,6 +495,28 @@ export function reducer(state: WalletState, action: Action): WalletState {
     case "LOGOUT":
       return { ...state, session: null, authError: null, lastResult: null, opsResult: null };
 
+    case "RESET_DEMO": {
+      const fresh = createState(new Date());
+      const sara = fresh.accounts.find((item) => item.mobile === DEMO_MOBILE && !item.system);
+      if (!sara) return fresh;
+      return {
+        ...fresh,
+        session: {
+          userId: sara.id,
+          token: `sess_${digestOf(sara.id + Date.now()).slice(4)}`,
+          issuedAt: new Date().toISOString(),
+        },
+        authError: null,
+        lastResult: {
+          tone: "neutral",
+          title: "دمو بازنشانی شد",
+          message: "همه موجودی‌ها، تراکنش‌ها و لایه‌ها به حالت اولیه برگشتند. دوباره با حساب سارا وارد هستید.",
+          balanceChanged: false,
+        },
+        opsResult: null,
+      };
+    }
+
     case "READ_NOTICES": {
       const userId = state.session?.userId;
       if (!userId) return state;

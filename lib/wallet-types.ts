@@ -299,6 +299,7 @@ export type Action =
   | { type: "REGISTER"; name: string; mobile: string; secret: string }
   | { type: "LOGIN"; mobile: string; secret: string }
   | { type: "LOGOUT" }
+  | { type: "RESET_DEMO" }
   | { type: "CLEAR_AUTH_ERROR" }
   | { type: "TOPUP_BEGIN"; amount: number }
   | { type: "TOPUP_CALLBACK"; paymentId: string; outcome: "SUCCESS" | "FAILED" }

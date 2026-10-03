@@ -4,3 +4,10 @@ out
 .DS_Store
 *.log
 _prd_extract
+test-results
+playwright-report
+blob-report
+.vercel
+.env*.local
+tsconfig.tsbuildinfo
+*.tsbuildinfo

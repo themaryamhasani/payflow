@@ -1,17 +1,18 @@
 import Link from "next/link";
 
 const LINKS = [
-  ["مسئله", "#problem"],
-  ["اصول", "#principles"],
-  ["مسیر", "#journey"],
-  ["دفترکل", "#flow"],
-  ["همزمانی", "#concurrency"],
-  ["قواعد", "#rules"],
-  ["لایه‌ها", "#layers"],
-  ["قرارداد", "#contract"],
-  ["مخاطبان", "#people"],
-  ["مرز محصول", "#scope"],
-  ["واژه‌نامه", "#glossary"],
+  ["مسئله", "/#problem"],
+  ["اصول", "/#principles"],
+  ["مسیر", "/#journey"],
+  ["دفترکل", "/#flow"],
+  ["همزمانی", "/#concurrency"],
+  ["قواعد", "/#rules"],
+  ["لایه‌ها", "/#layers"],
+  ["قرارداد", "/#contract"],
+  ["مخاطبان", "/#people"],
+  ["مرز محصول", "/#scope"],
+  ["واژه‌نامه", "/#glossary"],
+  ["کیس‌استادی", "/about"],
 ];
 
 export function Footer() {
@@ -25,17 +26,25 @@ export function Footer() {
           </div>
           <nav aria-label="نمای صفحه">
             {LINKS.map(([label, href]) => (
-              <a key={href} href={href}>
+              <Link key={href} href={href}>
                 {label}
-              </a>
+              </Link>
             ))}
             <Link href="/wallet">کیف پول</Link>
           </nav>
         </div>
-        <p className="colo-note">
-          مطالعه موردی محصول بر اساس سند تحلیل و نیازمندی PayFlow. تهیه‌کننده سند: Maryam Hasani. این وب‌سایت سامانه بانکی
-          دارای مجوز نیست و تراکنش حقیقی انجام نمی‌دهد. واحد پول نمونه: ریال ایران.
-        </p>
+        <aside className="site-disclaimer" aria-label="دیسکلیمر نمونه‌کار">
+          <p>
+            <strong>مطالعه موردی محصول / نمونه‌کار.</strong> این وب‌سایت سامانه بانکی دارای مجوز نیست، سرویس مالی واقعی ارائه
+            نمی‌دهد و هیچ پول حقیقی جابه‌جا نمی‌کند. کیف پول تعاملی یک sandbox محلی در مرورگر است.
+          </p>
+          <p>
+            بر اساس سند تحلیل و نیازمندی PayFlow. تهیه‌کننده سند: Maryam Hasani. واحد پول نمونه: ریال ایران.{" "}
+            <Link href="/about">درباره این کیس‌استادی</Link>
+            {" · "}
+            <span id="live-url-slot">لینک لایو پس از دیپلوی در README به‌روز می‌شود.</span>
+          </p>
+        </aside>
       </div>
     </footer>
   );

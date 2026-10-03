@@ -17,6 +17,9 @@ export function Close() {
         <Link className="btn btn-light" href="/wallet">
           گشودن کیف پول
         </Link>
+        <p className="cta-note on-dark">
+          مطالعه موردی / sandbox. ورود نمونه با حساب سارا؛ هیچ تراکنش حقیقی انجام نمی‌شود.
+        </p>
       </div>
     </section>
   );

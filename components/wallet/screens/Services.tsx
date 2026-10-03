@@ -104,7 +104,12 @@ export function Services({
       <ul className="w-services">
         {items.map((item) => (
           <li key={item.key}>
-            <button type="button" onClick={() => onOpenService(item.key)} data-locked={item.locked ? "yes" : "no"}>
+            <button
+              type="button"
+              onClick={() => onOpenService(item.key)}
+              data-locked={item.locked ? "yes" : "no"}
+              aria-label={`${item.title}. ${item.locked ? "قفل سطح احراز هویت" : "باز"}. ${item.state}`}
+            >
               <span>
                 <strong>{item.title}</strong>
                 <small>{item.summary}</small>

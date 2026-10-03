@@ -4,13 +4,13 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 const LINKS = [
-  { href: "#problem", label: "مسئله" },
-  { href: "#journey", label: "مسیر" },
-  { href: "#flow", label: "دفترکل" },
-  { href: "#concurrency", label: "همزمانی" },
-  { href: "#layers", label: "لایه‌ها" },
-  { href: "#contract", label: "قرارداد" },
-  { href: "#scope", label: "مرز محصول" },
+  { href: "/#problem", label: "مسئله" },
+  { href: "/#journey", label: "مسیر" },
+  { href: "/#flow", label: "دفترکل" },
+  { href: "/#concurrency", label: "همزمانی" },
+  { href: "/#layers", label: "لایه‌ها" },
+  { href: "/#contract", label: "قرارداد" },
+  { href: "/about", label: "کیس‌استادی" },
 ];
 
 export function Header() {
@@ -42,15 +42,15 @@ export function Header() {
 
   return (
     <header className={`site-header ${tone}`}>
-      <a className="brand" href="#top">
+      <Link className="brand" href="/">
         <span className="serif brand-mark">PayFlow</span>
         <span className="brand-sub">کیف پول دیجیتال</span>
-      </a>
+      </Link>
       <nav className="desk-nav" aria-label="بخش‌های صفحه">
         {LINKS.map((link) => (
-          <a key={link.href} href={link.href}>
+          <Link key={link.href} href={link.href}>
             {link.label}
-          </a>
+          </Link>
         ))}
       </nav>
       <Link className="btn btn-small header-cta" href="/wallet">
@@ -69,17 +69,17 @@ export function Header() {
         <div id="site-menu" className="mobile-menu">
           <nav aria-label="منوی همراه">
             {LINKS.map((link) => (
-              <a key={link.href} href={link.href} onClick={() => setOpen(false)}>
+              <Link key={link.href} href={link.href} onClick={() => setOpen(false)}>
                 {link.label}
-              </a>
+              </Link>
             ))}
-            <a href="#rules" onClick={() => setOpen(false)}>
+            <Link href="/#rules" onClick={() => setOpen(false)}>
               قواعد
-            </a>
-            <a href="#glossary" onClick={() => setOpen(false)}>
+            </Link>
+            <Link href="/#glossary" onClick={() => setOpen(false)}>
               واژه‌نامه
-            </a>
-            <Link className="btn" href="/wallet">
+            </Link>
+            <Link className="btn" href="/wallet" onClick={() => setOpen(false)}>
               گشودن کیف پول
             </Link>
           </nav>

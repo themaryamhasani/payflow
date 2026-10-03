@@ -139,6 +139,9 @@ export function Hero() {
               {actionLabel}
             </button>
           </div>
+          <p className="cta-note">
+            نمونه‌کار محصولی است؛ سامانه بانکی دارای مجوز نیست و پول حقیقی جابه‌جا نمی‌شود.
+          </p>
         </div>
 
         <div className="slip" aria-labelledby="slip-title">

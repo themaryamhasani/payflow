@@ -3,7 +3,9 @@
 import Link from "next/link";
 import { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { TxIcon } from "@/components/Icons";
-import { FeeBreakdown, ResultBlock, Row, Tab, TxRow } from "@/components/wallet/parts";
+import { DemoGuide } from "@/components/wallet/DemoGuide";
+import { FeeBreakdown, ResultBlock, Row, Tab, TxRow, Empty } from "@/components/wallet/parts";
+import { ScenarioPanel } from "@/components/wallet/ScenarioPanel";
 import { Assets } from "@/components/wallet/screens/Assets";
 import { CardScreen } from "@/components/wallet/screens/CardScreen";
 import { Credit } from "@/components/wallet/screens/Credit";
@@ -21,7 +23,9 @@ import {
   shortKey,
   toPersianDigits,
 } from "@/lib/format";
+import { buildScenario, type ScenarioId } from "@/lib/demo-scenarios";
 import { prefersReducedMotion } from "@/lib/motion";
+import { clearWalletState, loadWalletState, saveWalletState } from "@/lib/persist";
 import { TIERS, instrumentLabel } from "@/lib/catalog";
 import {
   DEMO_MOBILE,
@@ -101,7 +105,7 @@ export function WalletExperience() {
 }
 
 function WalletApp() {
-  const [state, dispatch] = useReducer(reducer, undefined, () => createState(new Date()));
+  const [state, dispatch] = useReducer(reducer, undefined, () => loadWalletState() ?? createState(new Date()));
   const [screen, setScreen] = useState<Screen>("home");
   const [detailId, setDetailId] = useState<string | null>(null);
   const [notesOpen, setNotesOpen] = useState(false);
@@ -120,6 +124,8 @@ function WalletApp() {
   const [reason, setReason] = useState("");
   const [reverseId, setReverseId] = useState("");
   const [reverseReason, setReverseReason] = useState("");
+  const [guideForce, setGuideForce] = useState(false);
+  const [flash, setFlash] = useState<{ title: string; message: string } | null>(null);
   const timers = useRef<number[]>([]);
 
   const user = currentUser(state);
@@ -135,6 +141,10 @@ function WalletApp() {
   );
 
   useEffect(() => {
+    saveWalletState(state);
+  }, [state]);
+
+  useEffect(() => {
     if (!notesOpen) return;
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") setNotesOpen(false);
@@ -143,14 +153,72 @@ function WalletApp() {
     return () => document.removeEventListener("keydown", onKey);
   }, [notesOpen]);
 
+  function resetUi() {
+    setScreen("home");
+    setDetailId(null);
+    setNotesOpen(false);
+    setTopupStep("form");
+    setTransferStep("who");
+    setAmountRaw("");
+    setDescription("");
+    setReceiverId("");
+    setTransferKey("");
+    setBusy(false);
+    setTypeFilter("ALL");
+    setStatusFilter("ALL");
+    setRange("all");
+    setPage(1);
+    setQuery("");
+    setReason("");
+    setReverseId("");
+    setReverseReason("");
+    setNextStatus("SUSPENDED");
+    setGuideForce(false);
+    setFlash(null);
+  }
+
+  function resetDemo() {
+    const confirmed = window.confirm("دمو به حالت اولیه برگردد؟ همه تراکنش‌ها و لایه‌های این نشست پاک می‌شوند.");
+    if (!confirmed) return;
+    timers.current.forEach((id) => window.clearTimeout(id));
+    timers.current = [];
+    clearWalletState();
+    resetUi();
+    dispatch({ type: "RESET_DEMO" });
+  }
+
+  function runScenario(id: ScenarioId) {
+    if (busy) return;
+    const plan = buildScenario(state, id);
+    plan.actions.forEach((action) => dispatch(action));
+    setFlash({ title: plan.title, message: plan.message });
+    if (plan.screen === "history") {
+      setPage(1);
+      setScreen("history");
+    } else if (plan.screen === "identity") {
+      setScreen("identity");
+    } else if (plan.screen === "remit") {
+      setScreen("remit");
+    } else {
+      setScreen("home");
+    }
+    if (prefersReducedMotion()) return;
+    setBusy(true);
+    const timer = window.setTimeout(() => setBusy(false), 360);
+    timers.current.push(timer);
+  }
+
   if (!user || !wallet) {
     return (
-      <AuthGate
-        error={state.authError}
-        onLogin={(mobile, secret) => dispatch({ type: "LOGIN", mobile, secret })}
-        onRegister={(name, mobile, secret) => dispatch({ type: "REGISTER", name, mobile, secret })}
-        onClearError={() => dispatch({ type: "CLEAR_AUTH_ERROR" })}
-      />
+      <>
+        <AuthGate
+          error={state.authError}
+          onLogin={(mobile, secret) => dispatch({ type: "LOGIN", mobile, secret })}
+          onRegister={(name, mobile, secret) => dispatch({ type: "REGISTER", name, mobile, secret })}
+          onClearError={() => dispatch({ type: "CLEAR_AUTH_ERROR" })}
+        />
+        <DemoGuide mode="auth" />
+      </>
     );
   }
 
@@ -232,7 +300,7 @@ function WalletApp() {
             {notesOpen ? (
               <div id="notices" className="w-notes">
                 <strong>اعلان‌ها</strong>
-                {notices.length === 0 ? <p>اعلانی نیست.</p> : null}
+                {notices.length === 0 ? <p role="status">اعلانی نیست.</p> : null}
                 {notices.slice(0, 6).map((notice) => (
                   <button
                     key={notice.id}
@@ -255,14 +323,32 @@ function WalletApp() {
             <strong>{user.name}</strong>
             <span dir="ltr">{maskMobile(user.mobile)}</span>
           </div>
+          <button className="w-linkish" type="button" onClick={() => setGuideForce(true)}>
+            راهنما
+          </button>
+          <button className="w-linkish" type="button" onClick={resetDemo} title="بازگرداندن دمو به حالت اولیه">
+            بازنشانی
+          </button>
           <button className="w-linkish" type="button" onClick={() => dispatch({ type: "LOGOUT" })}>
             خروج
           </button>
         </div>
       </header>
 
+      <DemoGuide mode="app" forceOpen={guideForce} onCloseForce={() => setGuideForce(false)} />
+
       <main id="content" className="w-shell">
-        <p className="w-banner">محیط آزمایش · تراکنش واقعی انجام نمی‌شود · واحد پول ریال</p>
+        <p className="w-banner">
+          مطالعه موردی محصول · محیط آزمایش · تراکنش واقعی انجام نمی‌شود · واحد پول ریال
+        </p>
+        {flash ? (
+          <p className="w-alert" role="status">
+            <strong>{flash.title}.</strong> {flash.message}{" "}
+            <button className="w-linkish" type="button" onClick={() => setFlash(null)}>
+              بستن
+            </button>
+          </p>
+        ) : null}
         <nav className="w-tabs" aria-label="بخش‌های کیف پول">
           <Tab on={screen === "home" || screen === "topup" || screen === "transfer"} onClick={goHome}>
             کیف پول
@@ -303,6 +389,8 @@ function WalletApp() {
             }}
             onOpen={openDetail}
             onAll={() => go("history")}
+            busy={busy}
+            onScenario={runScenario}
           />
         ) : null}
 
@@ -496,20 +584,41 @@ function WalletApp() {
         <button
           type="button"
           className={screen === "home" || screen === "topup" || screen === "transfer" ? "is-on" : ""}
+          aria-current={screen === "home" || screen === "topup" || screen === "transfer" ? "page" : undefined}
           onClick={goHome}
         >
           کیف پول
         </button>
-        <button type="button" className={screen === "assets" ? "is-on" : ""} onClick={() => go("assets")}>
+        <button
+          type="button"
+          className={screen === "assets" ? "is-on" : ""}
+          aria-current={screen === "assets" ? "page" : undefined}
+          onClick={() => go("assets")}
+        >
           دارایی‌ها
         </button>
-        <button type="button" className={inServices ? "is-on" : ""} onClick={() => go("services")}>
+        <button
+          type="button"
+          className={inServices ? "is-on" : ""}
+          aria-current={inServices ? "page" : undefined}
+          onClick={() => go("services")}
+        >
           خدمات
         </button>
-        <button type="button" className={screen === "history" || screen === "detail" ? "is-on" : ""} onClick={() => go("history")}>
+        <button
+          type="button"
+          className={screen === "history" || screen === "detail" ? "is-on" : ""}
+          aria-current={screen === "history" || screen === "detail" ? "page" : undefined}
+          onClick={() => go("history")}
+        >
           تاریخچه
         </button>
-        <button type="button" className={screen === "ops" ? "is-on" : ""} onClick={() => go("ops")}>
+        <button
+          type="button"
+          className={screen === "ops" ? "is-on" : ""}
+          aria-current={screen === "ops" ? "page" : undefined}
+          onClick={() => go("ops")}
+        >
           عملیات
         </button>
       </nav>
@@ -547,8 +656,8 @@ function AuthGate({
         </Link>
         <h1>برای دیدن کیف پول، وارد شوید.</h1>
         <p>
-          دسترسی به موجودی و تراکنش فقط برای صاحب همان کیف پول است. ورود نمونه با حساب موجود، یا ثبت‌نام تازه که یک کیف پول
-          خالی می‌سازد و مسیر اولین شارژ را نشان می‌دهد.
+          این sandbox مطالعه موردی است، نه سامانه بانکی دارای مجوز. دسترسی به موجودی و تراکنش فقط برای صاحب همان کیف پول
+          است. ورود نمونه با حساب موجود، یا ثبت‌نام تازه که یک کیف پول خالی می‌سازد و مسیر اولین شارژ را نشان می‌دهد.
         </p>
         <dl className="w-demo">
           <div>
@@ -666,6 +775,8 @@ function Home({
   onTransfer,
   onOpen,
   onAll,
+  busy,
+  onScenario,
 }: {
   state: WalletState;
   userId: string;
@@ -677,6 +788,8 @@ function Home({
   onTransfer: () => void;
   onOpen: (id: string) => void;
   onAll: () => void;
+  busy: boolean;
+  onScenario: (id: ScenarioId) => void;
 }) {
   const wallet = currentWallet(state)!;
   const inactive = wallet.status !== "ACTIVE";
@@ -746,13 +859,17 @@ function Home({
       {balance === 0 && !inactive ? (
         <p className="w-help">برای انتقال، اول کیف پول را شارژ کنید.</p>
       ) : null}
+      <ScenarioPanel busy={busy || inactive} onRun={onScenario} />
       <div className="w-block">
         <h2>تراکنش‌های اخیر</h2>
         {empty ? (
-          <div className="w-empty">
-            <p>هنوز تراکنشی ندارید.</p>
-            <p className="w-help">اولین شارژ موفق، کیف پول شما را فعال می‌کند و از همان لحظه در تاریخچه رد می‌گذارد.</p>
-          </div>
+          <Empty title="هنوز تراکنشی ندارید." action={
+            <button className="btn btn-ghost" type="button" onClick={onTopup}>
+              شروع با شارژ
+            </button>
+          }>
+            <p className="w-help">اولین شارژ موفق، کیف پول را فعال می‌کند و از همان لحظه در تاریخچه رد می‌گذارد.</p>
+          </Empty>
         ) : null}
         {recent.map((tx) => (
           <TxRow key={tx.id} state={state} userId={userId} tx={tx} onOpen={onOpen} />
@@ -1162,20 +1279,29 @@ function History({
             <option value="SUCCESS">موفق</option>
             <option value="FAILED">ناموفق</option>
             <option value="PENDING">در انتظار</option>
+            <option value="ON_HOLD">در بازبینی</option>
             <option value="CANCELLED">لغو شده</option>
             <option value="REVERSED">برگشت‌خورده</option>
           </select>
         </label>
       </div>
       {rows.length === 0 ? (
-        <div className="w-empty">
-          <p>تاریخچه خالی است.</p>
-          <button className="btn" type="button" onClick={onTopup}>
-            شارژ کیف پول
-          </button>
-        </div>
+        <Empty
+          title="تاریخچه خالی است."
+          action={
+            <button className="btn" type="button" onClick={onTopup}>
+              شارژ کیف پول
+            </button>
+          }
+        >
+          <p className="w-help">با اولین شارژ یا انتقال، رد دفترکل اینجا دیده می‌شود.</p>
+        </Empty>
       ) : null}
-      {rows.length > 0 && slice.length === 0 ? <p className="w-empty">تراکنشی با این فیلتر نیست.</p> : null}
+      {rows.length > 0 && slice.length === 0 ? (
+        <Empty title="تراکنشی با این فیلتر نیست.">
+          <p className="w-help">فیلتر نوع، وضعیت یا بازه را عوض کنید.</p>
+        </Empty>
+      ) : null}
       {slice.map((tx) => (
         <TxRow key={tx.id} state={state} userId={userId} tx={tx} onOpen={onOpen} showCounterparty />
       ))}
@@ -1223,10 +1349,16 @@ function Detail({
   if (!tx) {
     return (
       <section>
-        <p>این تراکنش در کیف پول شما نیست.</p>
-        <button className="btn" type="button" onClick={onBack}>
-          بازگشت
-        </button>
+        <Empty
+          title="این تراکنش در کیف پول شما نیست."
+          action={
+            <button className="btn" type="button" onClick={onBack}>
+              بازگشت به تاریخچه
+            </button>
+          }
+        >
+          <p className="w-help">ممکن است فیلتر عوض شده باشد یا رکورد مربوط به حساب دیگری باشد.</p>
+        </Empty>
       </section>
     );
   }
@@ -1371,7 +1503,11 @@ function Ops({
         جستجو
         <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="PF… یا TX… یا نام" />
       </label>
-      {hits.length === 0 ? <p className="w-empty">موردی یافت نشد.</p> : null}
+      {hits.length === 0 ? (
+        <Empty title="موردی یافت نشد.">
+          <p className="w-help">مرجع، شناسه تراکنش یا بخشی از نام طرف مقابل را امتحان کنید.</p>
+        </Empty>
+      ) : null}
       {hits.slice(0, 8).map((tx) => (
         <button className="w-hit" type="button" key={tx.id} onClick={() => onOpen(tx.id)}>
           <TxIcon status={tx.status} direction={directionFor(tx, userId)} />
